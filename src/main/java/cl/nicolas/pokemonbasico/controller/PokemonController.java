@@ -5,14 +5,16 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.TextFieldTableCell;
 
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class Controller implements Initializable {
+public class PokemonController implements Initializable {
 
     //1. Inyeccion de componentes definidos en el FXML
     @FXML
@@ -23,6 +25,10 @@ public class Controller implements Initializable {
     private TableColumn<Pokemon, String> colNombre;
     @FXML
     private TableColumn<Pokemon, String> colTipo;
+
+    @FXML private TextField txtId;
+    @FXML private TextField txtNombre;
+    @FXML private TextField txtTipo;
 
     //2. Lista reactiva con los datos origen
     private final ObservableList<Pokemon> listaPokemon = FXCollections.observableArrayList();
@@ -56,10 +62,45 @@ public class Controller implements Initializable {
     }
 
     @FXML
+    private void onGuardarClick(){
+        try{
+            //Capturar y validar datos de los TextField
+            int id = Integer.parseInt(txtId.getText().trim());
+            String nombre = txtNombre.getText().trim();
+            String tipo = txtTipo.getText().trim();
+
+            if(nombre.isEmpty() || tipo.isEmpty()){
+                mostrarAlerta("Campos vacios","Por favor complete todos los campos");
+                return;
+            }
+
+            //Crear el objeto y agregar a la ObservableList
+            //La tabla se actualiza automaticamente gracias a la observabilidad
+            listaPokemon.add(new Pokemon(id,nombre,tipo));
+
+            //limpiar los campos de texto
+            txtId.clear();
+            txtNombre.clear();
+            txtTipo.clear();
+
+        }catch(NumberFormatException e){
+            mostrarAlerta("Error de formato","El campo ID debe ser un número entero");
+        }
+    }
+
+    @FXML
     private void onEliminarClick(){
         Pokemon seleccionado = tableView.getSelectionModel().getSelectedItem();
         if(seleccionado != null){
             listaPokemon.remove(seleccionado);
         }
+    }
+
+    private void mostrarAlerta(String titulo,String mensaje){
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle(titulo);
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje);
+        alert.showAndWait();
     }
 }
